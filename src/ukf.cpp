@@ -2,6 +2,7 @@
 #include "Eigen/Dense"
 #include "tools.h"
 #include <iostream>
+#include <vector>
 
 using namespace std;
 using Eigen::MatrixXd;
@@ -423,14 +424,16 @@ void UKF::Update(MeasurementPackage meas_package) {
 
 	//compute NIS
 	double nis = Tools::CalculeNIS(Dz, Si);
+	std::vector<double>* nis_values;
 	if (meas_package.sensor_type_ == MeasurementPackage::LASER) {
-		nis_lidar_.push_back(nis);
+		nis_values = &nis_lidar_;
 		cout << "NIS Lidar: " << nis << endl;
 	} else {
-		nis_radar_.push_back(nis);
+		nis_values = &nis_radar_;
 		cout << "NIS Radar: " << nis << endl;
 	}
-
+	nis_values->push_back(nis);
 	//plot Graph
-	// PrintNIS(meas_package.sensor_type_);
+	if (nis_values->size() == 249)
+		Tools::PrintNIS(meas_package.sensor_type_, *nis_values);
 }
