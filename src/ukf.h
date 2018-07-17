@@ -31,6 +31,9 @@ public:
 	///* predicted sigma points matrix
 	MatrixXd Xsig_pred_;
 
+	///* augmented sigma points matrix
+	MatrixXd Xsig_aug_;
+
 	///* time when the state is true, in us
 	long long time_us_;
 
@@ -64,10 +67,26 @@ public:
 	///* Augmented state dimension
 	int n_aug_;
 
+	///* Lidar measurement state dimension
+	int n_z_l_;
+
+	///* Radar measurement state dimension
+	int n_z_r_;
+
 	///* Sigma point spreading parameter
 	double lambda_;
+	
+	///* Previous timestamp
+	long long previous_timestamp_;
+	
+	bool initialized_;
 
-
+	///* Store NIS values
+	std::vector<double> nis_lidar_;
+	std::vector<double> nis_radar_;
+	
+	///* Use Gnuplot to print the NIS graph
+	bool print_graph_;
 	/**
 	 * Constructor
 	 */
@@ -92,16 +111,16 @@ public:
 	void Prediction(double delta_t);
 
 	/**
-	 * Updates the state and the state covariance matrix using a laser measurement
+	 * Updates the state and the state covariance matrix using a measurement
 	 * @param meas_package The measurement at k+1
 	 */
-	void UpdateLidar(MeasurementPackage meas_package);
-
-	/**
-	 * Updates the state and the state covariance matrix using a radar measurement
-	 * @param meas_package The measurement at k+1
-	 */
-	void UpdateRadar(MeasurementPackage meas_package);
+	void Update(MeasurementPackage meas_package);
+	
+	void GenerateAugmentedSigmaPoints();
+	void SigmaPointPrediction(double delta_t);
+	void PredictMeanAndCovariance();
+	void PredictLidarMeasurement(VectorXd* z_out, MatrixXd* Zsig_out, MatrixXd* S_out);
+	void PredictRadarMeasurement(VectorXd* z_out, MatrixXd* Zsig_out, MatrixXd* S_out);
 };
 
 #endif /* UKF_H */
